@@ -1,0 +1,7 @@
+---
+
+- include: app.yml
+
+- include: uwsgi.yml
+
+- include: nginx.yml

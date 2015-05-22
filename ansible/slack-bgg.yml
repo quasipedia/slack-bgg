@@ -4,5 +4,6 @@
 - hosts: all
   roles:
     # - role: centos7
-    - role: pythonapp-server
-    - role: testapp
+    # - role: webserver
+    # - role: test-app
+    - role: bgg-app

@@ -1,0 +1,27 @@
+---
+
+- name: Install nginx configuration
+  sudo: yes
+  copy:
+    src: bgg-app.conf
+    dest: /srv/www/bgg-app/
+
+- name: Create nginx log directories
+  sudo: yes
+  file:
+    path: /var/log/bgg-app
+    state: directory
+
+- name: Modify nginx.conf file
+  sudo: yes
+  lineinfile:
+    backup: yes
+    dest: /etc/nginx/nginx.conf
+    insertafter: "        include /etc/nginx/default.d"
+    line: "        include /srv/www/bgg-app/bgg-app.conf;"
+
+- name: Restart nginx
+  sudo: yes
+  service:
+    name: nginx
+    state: restarted
