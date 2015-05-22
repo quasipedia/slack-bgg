@@ -1,7 +1,13 @@
 ---
 
+- name: Install git
+  sudo: yes
+  yum:
+    name: git
+    state: latest
+
 - include: app.yml
 
-- include: uwsgi.yml
+# - include: uwsgi.yml
 
-- include: nginx.yml
+# - include: nginx.yml

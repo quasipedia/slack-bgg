@@ -1,2 +1,8 @@
 ---
 
+- name: Check out the latest version of the code
+  sudo: yes
+  git:
+    accept_hostkey: yes
+    repo: https://github.com/quasipedia/slack-bgg.git
+    dest: /srv/www/bgg-app

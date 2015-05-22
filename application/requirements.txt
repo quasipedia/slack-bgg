@@ -1,0 +1,2 @@
+boardgamegeek==0.10.1
+wheel==0.24.0
