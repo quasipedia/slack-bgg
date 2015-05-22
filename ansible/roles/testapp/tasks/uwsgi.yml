@@ -1,0 +1,14 @@
+---
+
+- name: Ensure uwsgi is not running as a service
+  sudo: yes
+  service:
+    name: uwsgi
+    enabled: no
+    state: stopped
+
+- name: Install uWSGI configuration
+  sudo: yes
+  copy:
+    src: testapp.ini
+    dest: /etc/uwsgi/vassals

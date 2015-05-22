@@ -1,0 +1,11 @@
+---
+
+- name: Install python app
+  sudo: yes
+  copy:
+    src: testapp.py
+    dest: /srv/www/testapp/
+
+- include: uwsgi.yml
+
+- include: nginx.yml

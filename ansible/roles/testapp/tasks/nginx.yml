@@ -1,0 +1,27 @@
+---
+
+- name: Install nginx configuration
+  sudo: yes
+  copy:
+    src: testapp.conf
+    dest: /srv/www/testapp/
+
+- name: Create nginx log directories
+  sudo: yes
+  file:
+    path: /var/log/testapp
+    state: directory
+
+- name: Modify nginx.conf file
+  sudo: yes
+  lineinfile:
+    backup: yes
+    dest: /etc/nginx/nginx.conf
+    insertafter: "        include /etc/nginx/default.d"
+    line: "        include /srv/www/testapp/testapp.conf;"
+
+- name: Restart nginx
+  sudo: yes
+  service:
+    name: nginx
+    state: restarted

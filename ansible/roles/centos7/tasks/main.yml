@@ -1,0 +1,14 @@
+---
+
+- name: Enable epel
+  sudo: yes
+  yum:
+    name: epel-release
+    state: present
+
+- name: Update system
+  sudo: yes
+  yum:
+    name: "*"
+    state: latest
+    update_cache: yes

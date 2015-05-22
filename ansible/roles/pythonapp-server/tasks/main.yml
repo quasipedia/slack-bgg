@@ -1,0 +1,47 @@
+---
+
+- name: Install nginx
+  sudo: yes
+  yum:
+    name: nginx
+    state: latest
+
+- name: Install uwsgi
+  sudo: yes
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - uwsgi
+    - uwsgi-plugin-python
+
+- name: Create www-data user
+  sudo: yes
+  user:
+    name: www-data
+    createhome: no
+
+- name: Create vassal directory
+  sudo: yes
+  file:
+    path: /etc/uwsgi/vassals
+    state: directory
+
+- name: Install the emperor.ini file
+  sudo: yes
+  copy:
+    src: emperor.ini
+    dest: /etc/uwsgi
+
+- name: Install emperor.uwsgi service
+  sudo: yes
+  copy:
+    src: uwsgi-emperor.service.ini
+    dest: /etc/systemd/system/uwsgi-emperor.service
+
+- name: Make sure the uwsgi-emperor service is running
+  sudo: yes
+  service:
+    name: emperor.uwsgi
+    enabled: yes
+    state: started
