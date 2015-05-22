@@ -1,8 +1,23 @@
 ---
 
+- name: Installing development packages
+  sudo: yes
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - git
+    - python-virtualenv
+
 - name: Check out the latest version of the code
   sudo: yes
   git:
     accept_hostkey: yes
     repo: https://github.com/quasipedia/slack-bgg.git
     dest: /srv/www/bgg-app
+
+- name: Create virtualenv
+  sudo: yes
+  pip:
+    requirements: /srv/www/bgg-app/application/requirements.txt
+    virtualenv: /srv/www/bgg-app/venv
