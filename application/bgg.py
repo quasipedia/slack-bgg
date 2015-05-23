@@ -1,12 +1,16 @@
 import json
 from boardgamegeek import BoardGameGeek
+from werkzeug.wrappers import Request, Response
+
+bgg = BoardGameGeek()
 
 
-def application(env, start_response):
-    bgg = BoardGameGeek()
+@Request.application
+def application(request):
     g = bgg.game("Jaipur")
-    start_response('200 OK', [('Content-Type', 'text/html')])
-    payload = {
-        'text': 'Name: *{}* --- ID: *{}*\nMamma mia!'.format(g.name, g.id)
-    }
-    return [json.dumps(payload)]
+    return Response(json.dumps(g.name))
+
+
+if __name__ == '__main__':
+    from werkzeug.serving import run_simple
+    run_simple('localhost', 4000, application)
