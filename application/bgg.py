@@ -23,8 +23,7 @@ BGG_URL = 'https://boardgamegeek.com'
 BOT_NAME = 'BoardGameGeek'
 ICON_URL = 'https://slack.com/img/icons/app-57.png'
 HELP_TEXT = open('help.md').read()
-GAME_ATTRIBUTES = (
-)
+MISSING_DATA_STR = 'N/A'
 
 
 def fire_hook(payload):
@@ -38,8 +37,8 @@ def get_game_url(type_, id_):
 
 def build_cell(game, title, value=None, short=True):
     '''Return a cell for the game display.'''
-    value = value or getattr(game, title) or 'n/a'
-    return {'title': title, 'value': value, 'short': short}
+    value = value or getattr(game, title) or MISSING_DATA_STR
+    return {'title': title.capitalize(), 'value': value, 'short': short}
 
 
 def display_game(channel, game_id):
@@ -51,37 +50,41 @@ def display_game(channel, game_id):
     except BoardGameGeekAPIError:
         abort(404)  # Not found
     url = get_game_url('game', game.id)
+    play_mode = '{}-{} players aged {}+, {} minutes'.format(
+        game.min_players, game.max_players, game.min_age, game.playing_time)
+    if game.users_rated == 0:
+        rating = MISSING_DATA_STR
+    else:
+        rating = '{:.2f} (based on {} votes)'.format(
+            float(game.rating_average), game.users_rated)
     cells = [
+        build_cell(game, 'name'),
         build_cell(game, 'alternative_names'),
-        build_cell(game, 'categories'),
-        build_cell(game, 'description'),
-        build_cell(game, 'image', 'https:{}'.format(game.image)),
         build_cell(game, 'designers'),
         build_cell(game, 'year'),
-        build_cell(game, 'min_age'),
-        build_cell(game, 'min_players'),
-        build_cell(game, 'max_players'),
+        build_cell(game, 'categories'),
+        build_cell(game, 'play mode', value=play_mode),
         build_cell(game, 'mechanics'),
-        build_cell(game, 'playing_time'),
-        build_cell(game, 'ranks'),
-        build_cell(game, 'rating_average'),
-        build_cell(game, 'rating_average_weight'),
-        build_cell(game, 'rating_bayes_average'),
-        build_cell(game, 'rating_median'),
-        build_cell(game, 'rating_num_weights'),
-        build_cell(game, 'rating_stddev'),
-        build_cell(game, 'users_rated'),
+        build_cell(game, 'rating', value=rating),
+        build_cell(game, 'description', short=False),
     ]
+    if game.image:
+        medium_size = 'https:{}_t.jpg'.format(game.image[:-4])
+        text = '*{}*\n{}'.format(game.name, medium_size),
+    else:
+        text = '*{}*'.format(game.name),
     payload = {
         'channel': '#{}'.format(channel),
         'username': BOT_NAME,
         'icon_url': ICON_URL,
-        'text': '*{}*'.format(game.name),
-        'attachments': [{
-            'fallback': u'<{}|External page on BGG>'.format(url),
-            'color': 'good',
-            'fields': cells,
-        }],
+        'text': text,
+        'attachments': [
+            {
+                'fallback': u'<{}|External page on BGG>'.format(url),
+                'color': 'good',
+                'fields': cells,
+            },
+        ],
         'unfurl_links': True,
     }
     fire_hook(payload)
