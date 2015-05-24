@@ -156,7 +156,7 @@ def application(request):
     query = request.form.get('text')
     if not query:
         return Response(HELP_TEXT)
-    if query[0] == ':':
+    if query[0] == '#':
         if channel_name == 'directmessage':
             channel = '@{}'.format(user_name)
         else:
