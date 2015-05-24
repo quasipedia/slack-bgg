@@ -1,6 +1,9 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
 import json
 import requests
 import ConfigParser
+from collections import defaultdict
 
 from boardgamegeek import BoardGameGeek, BoardGameGeekAPIError
 from werkzeug.wrappers import Request, Response
@@ -14,16 +17,29 @@ def get_secrets():
 
 VALID_TOKEN, HOOK_URL = get_secrets()
 BGG = BoardGameGeek()
-SITE_URL = 'https://boardgamegeek.com'
+MAX_LIST_LENGTH = 15
+
+BGG_URL = 'https://boardgamegeek.com'
 BOT_NAME = 'BoardGameGeek'
 ICON_URL = 'https://slack.com/img/icons/app-57.png'
 HELP_TEXT = open('help.md').read()
-MAX_LIST_LENGTH = 15
+GAME_ATTRIBUTES = (
+)
 
 
 def fire_hook(payload):
     '''Fire the hook for Slack.'''
     requests.post(HOOK_URL, data={'payload': json.dumps(payload)})
+
+
+def get_game_url(type_, id_):
+    return '{}/{}/{}'.format(BGG_URL, type_, id_)
+
+
+def build_cell(game, title, value=None, short=True):
+    '''Return a cell for the game display.'''
+    value = value or getattr(game, title) or 'n/a'
+    return {'title': title, 'value': value, 'short': short}
 
 
 def display_game(channel, game_id):
@@ -34,33 +50,79 @@ def display_game(channel, game_id):
         abort(400)  # Bad request
     except BoardGameGeekAPIError:
         abort(404)  # Not found
+    url = get_game_url('game', game.id)
+    cells = [
+        build_cell(game, 'alternative_names'),
+        build_cell(game, 'categories'),
+        build_cell(game, 'description'),
+        build_cell(game, 'image', 'https:{}'.format(game.image)),
+        build_cell(game, 'designers'),
+        build_cell(game, 'year'),
+        build_cell(game, 'min_age'),
+        build_cell(game, 'min_players'),
+        build_cell(game, 'max_players'),
+        build_cell(game, 'mechanics'),
+        build_cell(game, 'playing_time'),
+        build_cell(game, 'ranks'),
+        build_cell(game, 'rating_average'),
+        build_cell(game, 'rating_average_weight'),
+        build_cell(game, 'rating_bayes_average'),
+        build_cell(game, 'rating_median'),
+        build_cell(game, 'rating_num_weights'),
+        build_cell(game, 'rating_stddev'),
+        build_cell(game, 'users_rated'),
+    ]
     payload = {
         'channel': '#{}'.format(channel),
         'username': BOT_NAME,
         'icon_url': ICON_URL,
-        'text': game.name,
-        # 'attachments': cells
+        'text': '*{}*'.format(game.name),
+        'attachments': [{
+            'fallback': u'<{}|External page on BGG>'.format(url),
+            'color': 'good',
+            'fields': cells,
+        }],
+        'unfurl_links': True,
     }
     fire_hook(payload)
+
+
+def preprocess_hits(hits):
+    '''Preprocess the hits, marking conflicts and sorting the data.'''
+    pages_per_id = defaultdict(int)
+    for hit in hits:
+        pages_per_id[hit.id] += 1
+    data = []
+    for hit in hits:
+        occurrencies = pages_per_id[hit.id]
+        if occurrencies == 1:
+            data.append((hit.year, hit.name, hit.type, hit.id, False))
+        if occurrencies > 1:
+            data.append((hit.year, hit.name, hit.type, hit.id, True))
+            pages_per_id[hit.id] = 0  # Other hits with same ID: discarded
+    return sorted(data, reverse=True)
 
 
 def search_games(user, query):
     '''Send data about a specifig game to Slack.'''
     hits = BGG.search(query, 4 | 8)  # 4 | 8 == games + expansions
-    data = [(h.year, h.name, h.type, h.id) for h in hits]
-    data.sort(reverse=True)
+    data = preprocess_hits(hits)
     cells = []
-    for year, name, type_, id_ in data[:MAX_LIST_LENGTH]:
-        url = '{}/{}/{}'.format(SITE_URL, type_, id_)
-        color = '#330099' if type_ == 'boardgame' else '#66CCFF'
+    for year, name, type_, id_, is_conflict in data[:MAX_LIST_LENGTH]:
+        url = get_game_url(type_, id_)
+        if is_conflict:
+            color = 'warning'
+        else:
+            color = '#330099' if type_ == 'boardgame' else '#66CCFF'
         cells.append({
             'fallback': u'{} <{}>'.format(name, url),
             'color': color,
             'fields': [
                 {
                     'title': name,
-                    'value': u'({}) ID: #{} - <{}|BGG page>'.format(
+                    'value': u'({}) #{} - <{}|BGG➚>'.format(
                         year, id_, url),
+                    'short': False,
                 }
             ]
         })
