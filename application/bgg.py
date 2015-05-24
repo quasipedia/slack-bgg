@@ -21,14 +21,30 @@ HELP_TEXT = open('help.md').read()
 MAX_LIST_LENGTH = 5
 
 
-def send_game(channel, game):
-    '''Send data about a specifig game to Slack.'''
+def fire_hook(payload):
+    '''Fire the hook for Slack.'''
+    requests.post(HOOK_URL, data={'payload': json.dumps(payload)})
 
 
-def send_list(channel, hits):
+def display_game(channel, game_id):
+    '''Retrieve and format a game based on its game ID.'''
+    payload = {
+        'channel': '#{}'.format(channel),
+        'username': BOT_NAME,
+        'icon_url': ICON_URL,
+        'text': 'Single game',
+        # 'attachments': cells
+    }
+    fire_hook(payload)
+
+
+def search_games(user, query):
     '''Send data about a specifig game to Slack.'''
+    hits = BGG.search(query, 4 | 8)  # 4 | 8 == games + expansions
+    data = [(h.year, h.name, h.type, h.id) for h in hits]
+    data.sort(reverse=True)
     cells = []
-    for year, name, type_, id_ in hits[:MAX_LIST_LENGTH]:
+    for year, name, type_, id_ in data[:MAX_LIST_LENGTH]:
         url = '{}/{}/{}'.format(SITE_URL, type_, id_)
         htype = 'Game' if type_ == 'boardgame' else 'Expansion'
         color = 'good' if type_ == 'boardgame' else 'warning'
@@ -43,24 +59,12 @@ def send_list(channel, hits):
             ]
         })
     payload = {
-        'channel': '#{}'.format(channel),
+        'channel': '@{}'.format(user),
         'username': BOT_NAME,
         'icon_url': ICON_URL,
         'text': '{} matching items'.format(len(hits)),
         'attachments': cells}
-    requests.post(HOOK_URL, data={'payload': json.dumps(payload)})
-
-
-def process(channel, query):
-    '''Process a valid query.'''
-    # Perform a global search
-    hits = BGG.search(query, 4 | 8)  # 4 | 8 == games + expansions
-    # Try to match the title exactly
-    if len(hits) == 1:
-        send_game(channel, BGG.game(game_id=hits[0].id))
-    else:
-        hits = [(h.year, h.name, h.type, h.id) for h in hits]
-        send_list(channel, sorted(hits, reverse=True))
+    fire_hook(payload)
 
 
 @Request.application
@@ -69,11 +73,15 @@ def application(request):
         abort(405)
     if request.form.get('token') != VALID_TOKEN:
         abort(401)
-    channel = request.form['channel_name']
+    user_name = request.form['user_name']
+    channel_name = request.form['channel_name']
     query = request.form.get('text')
     if not query:
         return Response(HELP_TEXT)
-    process(channel, query)
+    if query[0] == '#':
+        display_game(channel_name, query)
+    else:
+        search_games(user_name, query)
     return Response()
 
 
