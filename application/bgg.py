@@ -17,7 +17,7 @@ BGG = BoardGameGeek()
 SITE_URL = 'https://boardgamegeek.com'
 BOT_NAME = 'BoardGameGeek'
 ICON_URL = 'https://slack.com/img/icons/app-57.png'
-HELP_TEXT = 'Help text\nfoo\nbar.'
+HELP_TEXT = open('help.md').read()
 MAX_LIST_LENGTH = 5
 
 
