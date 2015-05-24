@@ -74,7 +74,7 @@ def display_game(channel, game_id):
         medium_size = 'https:{}_t.jpg'.format(game.image[:-4])
         text = '\n'.join((text, medium_size))
     payload = {
-        'channel': '#{}'.format(channel),
+        'channel': channel,
         'username': BOT_NAME,
         'icon_url': ICON_URL,
         'text': text,
@@ -105,7 +105,7 @@ def preprocess_hits(hits):
     return sorted(data, reverse=True)
 
 
-def search_games(user, query):
+def search_games(channel, query):
     '''Send data about a specifig game to Slack.'''
     hits = BGG.search(query, 4 | 8)  # 4 | 8 == games + expansions
     data = preprocess_hits(hits)
@@ -137,7 +137,7 @@ def search_games(user, query):
             text = '{} Showing the first {} results.'.format(
                 text, MAX_LIST_LENGTH)
     payload = {
-        'channel': '@{}'.format(user),
+        'channel': channel,
         'username': BOT_NAME,
         'icon_url': ICON_URL,
         'text': text,
@@ -157,9 +157,13 @@ def application(request):
     if not query:
         return Response(HELP_TEXT)
     if query[0] == ':':
-        display_game(channel_name, query)
+        if channel_name == 'directmessage':
+            channel = '@{}'.format(user_name)
+        else:
+            channel = '#{}'.format(channel_name)
+        display_game(channel, query)
     else:
-        search_games(user_name, query)
+        search_games('@{}'.format(user_name), query)
     return Response()
 
 
