@@ -38,7 +38,8 @@ def get_game_url(type_, id_):
 def build_cell(game, title, value=None, short=True):
     '''Return a cell for the game display.'''
     value = value or getattr(game, title) or MISSING_DATA_STR
-    return {'title': title.capitalize(), 'value': value, 'short': short}
+    return {'title': title.replace('_', ' ').capitalize(),
+            'value': value, 'short': short}
 
 
 def display_game(channel, game_id):
@@ -68,11 +69,10 @@ def display_game(channel, game_id):
         build_cell(game, 'rating', value=rating),
         build_cell(game, 'description', short=False),
     ]
+    text = '*{}*  <{}|BGG➚>'.format(game.name, url)
     if game.image:
         medium_size = 'https:{}_t.jpg'.format(game.image[:-4])
-        text = '*{}*\n{}'.format(game.name, medium_size),
-    else:
-        text = '*{}*'.format(game.name),
+        text = '\n'.join((text, medium_size))
     payload = {
         'channel': '#{}'.format(channel),
         'username': BOT_NAME,
@@ -85,7 +85,6 @@ def display_game(channel, game_id):
                 'fields': cells,
             },
         ],
-        'unfurl_links': True,
     }
     fire_hook(payload)
 
