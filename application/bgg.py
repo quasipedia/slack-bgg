@@ -156,7 +156,7 @@ def application(request):
     query = request.form.get('text')
     if not query:
         return Response(HELP_TEXT)
-    if query[0] == '#':
+    if query[0] == ':':
         display_game(channel_name, query)
     else:
         search_games(user_name, query)
