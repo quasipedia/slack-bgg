@@ -21,7 +21,7 @@ MAX_LIST_LENGTH = 15
 
 BGG_URL = 'https://boardgamegeek.com'
 BOT_NAME = 'BoardGameGeek'
-ICON_URL = 'https://slack.com/img/icons/app-57.png'
+ICON_URL = 'https://cf.geekdo-images.com/images/pic1862013_t.jpg'
 HELP_TEXT = open('help.md').read()
 MISSING_DATA_STR = 'N/A'
 
