@@ -1,5 +1,6 @@
 This command integrates <https://boardgamegeek.com|BoardGameGeek>.  Usage:
-`/bgg`: show this help text *[to user]*.
-`/bgg <search-terms>`: search games and expansions *[to user]*.
-`/bgg #<game-id-number>`: show detailed information on single game *[to channel]*.
-Search results are sorted by reverse year of publication, *dark blue* items are games, *light blue* are expansions.
+`/bgg` show this help text *[echo to user]*.
+`/bgg <search-terms>` search games and expansions *[echo to user]*.
+`/bgg #<game-id-number>` show detailed information on single game *[echo to channel]*.
+Search sorting: by reverse year of publication.
+Color codes: *dark blue* for games, *light blue* for expansions.
