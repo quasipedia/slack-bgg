@@ -1,7 +1,5 @@
-This command integrates BoardGameGeek.com
+This command integrates <https://boardgamegeek.com|BoardGameGeek>.  Usage:
 
-Basic searches are performed with `/bgg <search-terms>` and their result is
-shown exclusively *to the user* who issued the command.
+`/bgg <search-terms>`: searches for games and expansions and list the result  *to the user* who issued the command.
 
-To show detailed information on a single game *to everybody in the channel*:
-`/bgg #<game-id-number>`
+`/bgg #<game-id-number>`: show detailed information on a single game *to everybody in the channel*.
