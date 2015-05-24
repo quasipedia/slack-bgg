@@ -69,7 +69,7 @@ def display_game(channel, game_id):
         build_cell(game, 'rating', value=rating),
         build_cell(game, 'description', short=False),
     ]
-    text = '*{}*  <{}|BGG➚>'.format(game.name, url)
+    text = u'*{}*  <{}|BGG➚>'.format(game.name, url)
     if game.image:
         medium_size = 'https:{}_t.jpg'.format(game.image[:-4])
         text = '\n'.join((text, medium_size))
@@ -158,12 +158,12 @@ def application(request):
         return Response(HELP_TEXT)
     if query[0] == '#':
         if channel_name == 'directmessage':
-            channel = '@{}'.format(user_name)
+            channel = u'@{}'.format(user_name)
         else:
-            channel = '#{}'.format(channel_name)
+            channel = u'#{}'.format(channel_name)
         display_game(channel, query)
     else:
-        search_games('@{}'.format(user_name), query)
+        search_games(u'@{}'.format(user_name), query)
     return Response()
 
 
