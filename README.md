@@ -42,7 +42,7 @@ not fix at a later stage):
   - [ ] Requests to APIs are not async (no python3 → no cake!)
   - [ ] Sorting of search results is not very useful (try to find the game ID
         of _Risk!_ or _Monopoly_ if you don't believe me!)
-  - [ ] No pagination for search result
+  - [ ] No pagination for search results
 
 Also, limitations you should be aware that are not due to my code but to Slack
 API limitations:
