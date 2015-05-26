@@ -32,6 +32,14 @@ The easiest way to run the playbook is:
     ansible-playbook ansible/slack-bgg.yml -i <IP-here>, --user=<user-name>
 
 
+## Configuration
+
+In order for the app to interact with a Slack instance, you will need to
+configure both the authentication token sent by Slack to the app and the
+webhook URL the app should use.  These setting must be saved in a file called
+`secrets.ini`.  You can use the `secrets.template` as a blueprint for that.
+
+
 ## Known limitations
 
 *This code is the result of a hackday, so the code works but it's far from a
