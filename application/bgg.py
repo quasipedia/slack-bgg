@@ -32,11 +32,12 @@ def fire_hook(payload):
 
 
 def get_game_url(type_, id_):
+    '''Return the URL to a game of known id.'''
     return '{}/{}/{}'.format(BGG_URL, type_, id_)
 
 
 def build_cell(game, title, value=None, short=True):
-    '''Return a cell for the game display.'''
+    '''Return a slack "cell" for the game display.'''
     value = value or getattr(game, title) or MISSING_DATA_STR
     return {'title': title.replace('_', ' ').capitalize(),
             'value': value, 'short': short}
