@@ -158,7 +158,7 @@ def application(request):
     if not query:
         return Response(HELP_TEXT)
     if query[0] == '#':
-        if channel_name == 'directmessage' or 'privategroup':
+        if channel_name in ('directmessage', 'privategroup'):
             channel = u'@{}'.format(user_name)
         else:
             channel = u'#{}'.format(channel_name)
